@@ -1,9 +1,9 @@
-package main
+package gql
 
 import (
 	"github.com/graphql-go/graphql"
-	"github.com/manjurulhoque/go-gql-crud/models"
-	"github.com/manjurulhoque/go-gql-crud/types"
+	"github.com/manjurulhoque/go-gql-crud/internal/gql/types"
+	"github.com/manjurulhoque/go-gql-crud/internal/models"
 )
 
 var MutationType = graphql.NewObject(graphql.ObjectConfig{
@@ -12,7 +12,10 @@ var MutationType = graphql.NewObject(graphql.ObjectConfig{
 		"createTodo": &graphql.Field{
 			Type: types.PostType,
 			Args: graphql.FieldConfigArgument{
-				"text": &graphql.ArgumentConfig{
+				"title": &graphql.ArgumentConfig{
+					Type: graphql.NewNonNull(graphql.String),
+				},
+				"description": &graphql.ArgumentConfig{
 					Type: graphql.NewNonNull(graphql.String),
 				},
 			},

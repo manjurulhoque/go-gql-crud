@@ -2,19 +2,12 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
-	"github.com/manjurulhoque/go-gql-crud/dbc"
-	"github.com/manjurulhoque/go-gql-crud/models"
+	"github.com/manjurulhoque/go-gql-crud/internal/gql"
+	"github.com/manjurulhoque/go-gql-crud/internal/models"
+	"github.com/manjurulhoque/go-gql-crud/pkg/dbc"
 	"log/slog"
 	"net/http"
-)
-
-var schema, _ = graphql.NewSchema(
-	graphql.SchemaConfig{
-		Query:    QueryType,
-		Mutation: MutationType,
-	},
 )
 
 func main() {
@@ -32,10 +25,11 @@ func main() {
 	}
 
 	r := gin.Default()
+	sc := gql.Schema
 
 	// Set up a handler for GraphQL queries
 	h := handler.New(&handler.Config{
-		Schema:     &schema,
+		Schema:     &sc,
 		Pretty:     true,
 		GraphiQL:   true,
 		Playground: true,

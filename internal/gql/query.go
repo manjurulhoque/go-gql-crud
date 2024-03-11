@@ -1,9 +1,9 @@
-package main
+package gql
 
 import (
 	"github.com/graphql-go/graphql"
-	"github.com/manjurulhoque/go-gql-crud/models"
-	"github.com/manjurulhoque/go-gql-crud/types"
+	"github.com/manjurulhoque/go-gql-crud/internal/gql/types"
+	"github.com/manjurulhoque/go-gql-crud/internal/models"
 )
 
 var QueryType = graphql.NewObject(graphql.ObjectConfig{
