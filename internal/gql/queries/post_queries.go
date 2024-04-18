@@ -19,4 +19,20 @@ var PostQueries = graphql.Fields{
 			return posts, nil
 		},
 	},
+	"post": &graphql.Field{
+		Type: types.PostType,
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Type: graphql.NewNonNull(graphql.Int),
+			},
+		},
+		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			var post models.Post
+			err := dbc.GetDB().First(&post, p.Args["id"].(int)).Error
+			if err != nil {
+				return nil, err
+			}
+			return post, nil
+		},
+	},
 }

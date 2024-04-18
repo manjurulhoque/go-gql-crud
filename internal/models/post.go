@@ -17,3 +17,8 @@ func (post *Post) Create() error {
 func (post *Post) Update() error {
 	return dbc.GetDB().Save(post).Error
 }
+
+// Delete removes an existing post from the database
+func (post *Post) Delete() error {
+	return dbc.GetDB().Delete(post).Error
+}
