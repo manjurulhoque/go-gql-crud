@@ -8,6 +8,15 @@ import (
 	"github.com/manjurulhoque/go-gql-crud/pkg/dbc"
 )
 
+type MyExtendedError struct {
+	error
+	extensions map[string]interface{}
+}
+
+func (e *MyExtendedError) Extensions() map[string]interface{} {
+	return e.extensions
+}
+
 var PostMutations = graphql.Fields{
 	"createPost": &graphql.Field{
 		Type: types.PostType,
@@ -64,11 +73,18 @@ var PostMutations = graphql.Fields{
 			// Fetch the post to delete by its ID
 			err := dbc.GetDB().First(&post, id).Error
 			if err != nil {
+				//return false, gqlerrors.FormatError(&gqlerrors.Error{
+				//	Message: err.Error(),
+				//	OriginalError: gqlerrors.ExtendedError(&MyExtendedError{
+				//		extensions: map[string]interface{}{
+				//			"code": "SOME_ERROR_CODE",
+				//		},
+				//	}),
+				//})
 				return false, gqlerrors.FormattedError{
-					Message: "An error occurred",
+					Message: err.Error(),
 					Extensions: map[string]interface{}{
-						"code":   "SOME_ERROR_CODE",
-						"detail": "More information about the error",
+						"code": "NOT_FOUND",
 					},
 				}
 				//return false, err

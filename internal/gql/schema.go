@@ -10,15 +10,15 @@ func GetRootMutation() *graphql.Object {
 	return graphql.NewObject(graphql.ObjectConfig{
 		Name: "RootMutation",
 		Fields: graphql.FieldsThunk(func() graphql.Fields {
-			// Initialize your root mutation fields
 			rootFields := graphql.Fields{}
 
 			// Combine product mutations
 			for name, field := range mutations.PostMutations {
 				rootFields[name] = field
 			}
-
-			// Add other domain-specific mutations in a similar way
+			for name, field := range mutations.UserMutations {
+				rootFields[name] = field
+			}
 
 			return rootFields
 		}),

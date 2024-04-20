@@ -18,9 +18,9 @@ func main() {
 	}
 
 	// Migrate the schema
-	err = db.AutoMigrate(&models.Post{})
+	err = db.AutoMigrate(&models.Post{}, &models.User{})
 	if err != nil {
-		slog.Error("Error migration post model")
+		slog.Error("Error migrating models")
 		return
 	}
 
@@ -33,6 +33,20 @@ func main() {
 		Pretty:     true,
 		GraphiQL:   true,
 		Playground: true,
+		//FormatErrorFn: func(err error) gqlerrors.FormattedError {
+		//	//if formattedErr, ok := err.(*gqlerrors.Error); ok {
+		//	//	return gqlerrors.FormatError(formattedErr)
+		//	//}
+		//	gqlErr := gqlerrors.FormattedError{
+		//		Message: err.Error(),
+		//	}
+		//	if formattedErr, ok := err.(gqlerrors.FormattedError); ok {
+		//		if formattedErr.Extensions != nil {
+		//			gqlErr.Extensions = formattedErr.Extensions
+		//		}
+		//	}
+		//	return gqlErr
+		//},
 	})
 
 	// Convert http.HandlerFunc to gin.HandlerFunc

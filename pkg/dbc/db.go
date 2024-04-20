@@ -22,7 +22,9 @@ func DatabaseConnection() (*gorm.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
 	}
+	sqlDB.SetMaxOpenConns(1) // Only one open connection at a time
 	sqlDB.SetConnMaxLifetime(time.Minute * 20)
+	sqlDB.SetMaxIdleConns(1) // Reduce the number of idle connections
 
 	return db, nil
 }
