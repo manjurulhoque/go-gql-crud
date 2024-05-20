@@ -3,8 +3,10 @@ package mutations
 import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/gqlerrors"
+	middleware "github.com/manjurulhoque/go-gql-crud/internal"
 	"github.com/manjurulhoque/go-gql-crud/internal/gql/types"
 	"github.com/manjurulhoque/go-gql-crud/internal/models"
+	"github.com/manjurulhoque/go-gql-crud/internal/utils"
 	"github.com/manjurulhoque/go-gql-crud/pkg/dbc"
 )
 
@@ -17,9 +19,14 @@ func (e *MyExtendedError) Extensions() map[string]interface{} {
 	return e.extensions
 }
 
+type PostResponse struct {
+	Success bool               `json:"success,omitempty"`
+	Errors  []utils.FieldError `json:"errors,omitempty"`
+}
+
 var PostMutations = graphql.Fields{
 	"createPost": &graphql.Field{
-		Type: types.PostType,
+		Type: types.PostResponseType,
 		Args: graphql.FieldConfigArgument{
 			"title": &graphql.ArgumentConfig{
 				Type: graphql.NewNonNull(graphql.String),
@@ -28,14 +35,35 @@ var PostMutations = graphql.Fields{
 				Type: graphql.NewNonNull(graphql.String),
 			},
 		},
-		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		Resolve: middleware.AuthMiddleware(func(p graphql.ResolveParams) (interface{}, error) {
 			post := models.Post{
 				Title:       p.Args["title"].(string),
 				Description: p.Args["description"].(string),
 			}
+			validationErrors := utils.TranslateError(post)
+			if validationErrors != nil {
+				return &PostResponse{
+					Success: false,
+					Errors:  validationErrors,
+				}, nil
+			}
+
 			err := post.Create()
-			return post, err
-		},
+			if err != nil {
+				return &PostResponse{
+					Success: false,
+					Errors: []utils.FieldError{
+						{
+							Key:   "unknown",
+							Value: err.Error(),
+						},
+					},
+				}, nil
+			}
+			return &PostResponse{
+				Success: true,
+			}, nil
+		}),
 	},
 	"updatePost": &graphql.Field{
 		Type: types.PostType,

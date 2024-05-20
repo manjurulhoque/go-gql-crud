@@ -20,3 +20,15 @@ var PostType = graphql.NewObject(
 		},
 	},
 )
+
+var PostResponseType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "PostResponseType",
+	Fields: graphql.Fields{
+		"success": &graphql.Field{
+			Type: graphql.Boolean,
+		},
+		"errors": &graphql.Field{
+			Type: graphql.NewList(FieldErrorType),
+		},
+	},
+})

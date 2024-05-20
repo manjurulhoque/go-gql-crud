@@ -67,7 +67,7 @@ var LoginResponseType = graphql.NewObject(graphql.ObjectConfig{
 })
 
 var TokenRefreshResponseType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "TokenRefreshResponse",
+	Name: "TokenRefreshResponseType",
 	Fields: graphql.Fields{
 		"success": &graphql.Field{
 			Type: graphql.Boolean,

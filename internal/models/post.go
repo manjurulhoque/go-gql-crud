@@ -4,7 +4,7 @@ import "github.com/manjurulhoque/go-gql-crud/pkg/dbc"
 
 type Post struct {
 	ID          int    `json:"id"`
-	Title       string `json:"title"`
+	Title       string `json:"title,min=5"`
 	Description string `json:"description"`
 }
 
