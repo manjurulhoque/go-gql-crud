@@ -6,12 +6,21 @@ import (
 	"github.com/manjurulhoque/go-gql-crud/internal/gql/types"
 	"github.com/manjurulhoque/go-gql-crud/internal/models"
 	"github.com/manjurulhoque/go-gql-crud/internal/utils"
+	"github.com/manjurulhoque/go-gql-crud/pkg/dbc"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type RegisterResponse struct {
 	Success bool               `json:"success,omitempty"`
 	Errors  []utils.FieldError `json:"errors,omitempty"`
 	User    *models.User       `json:"user,omitempty"`
+}
+
+type LoginResponse struct {
+	Success bool               `json:"success,omitempty"`
+	Errors  []utils.FieldError `json:"errors,omitempty"`
+	Access  string             `json:"access"`
+	Refresh string             `json:"refresh"`
 }
 
 var UserMutations = graphql.Fields{
@@ -56,6 +65,75 @@ var UserMutations = graphql.Fields{
 			return &RegisterResponse{
 				Success: true,
 				User:    nil,
+			}, nil
+		},
+	},
+	"login": &graphql.Field{
+		Type: types.LoginResponseType,
+		Args: graphql.FieldConfigArgument{
+			"email": &graphql.ArgumentConfig{
+				Type: graphql.NewNonNull(graphql.String),
+			},
+			"password": &graphql.ArgumentConfig{
+				Type: graphql.NewNonNull(graphql.String),
+			},
+		},
+		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			loginInput := auth.LoginInput{
+				Email:    p.Args["email"].(string),
+				Password: p.Args["password"].(string),
+			}
+			validationErrors := utils.TranslateError(loginInput)
+			if validationErrors != nil {
+				return &LoginResponse{
+					Success: false,
+					Errors:  validationErrors,
+				}, nil
+			}
+			dbUser := models.User{}
+			if err := dbc.GetDB().Table("users").Where("email = ?", loginInput.Email).First(&dbUser).Error; err != nil {
+				return &LoginResponse{
+					Success: false,
+					Errors: []utils.FieldError{
+						{
+							Key:   "email",
+							Value: "Invalid email or password",
+						},
+					},
+				}, err
+			}
+			err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(loginInput.Password))
+
+			if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+				return &LoginResponse{
+					Success: false,
+					Errors: []utils.FieldError{
+						{
+							Key:   "password",
+							Value: "Invalid password",
+						},
+					},
+				}, nil
+			}
+
+			accessToken, refreshToken, err := auth.Login(&dbUser)
+
+			if err != nil {
+				return &LoginResponse{
+					Success: false,
+					Errors: []utils.FieldError{
+						{
+							Key:   "unknown",
+							Value: err.Error(),
+						},
+					},
+				}, err
+			}
+
+			return &LoginResponse{
+				Success: true,
+				Access:  accessToken,
+				Refresh: refreshToken,
 			}, nil
 		},
 	},

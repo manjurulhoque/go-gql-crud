@@ -34,7 +34,7 @@ var FieldErrorType = graphql.NewObject(graphql.ObjectConfig{
 })
 
 var RegisterResponseType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "RegisterResponse",
+	Name: "RegisterResponseType",
 	Fields: graphql.Fields{
 		"success": &graphql.Field{
 			Type: graphql.Boolean,
@@ -44,6 +44,24 @@ var RegisterResponseType = graphql.NewObject(graphql.ObjectConfig{
 		},
 		"user": &graphql.Field{
 			Type: UserType,
+		},
+	},
+})
+
+var LoginResponseType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "LoginResponseType",
+	Fields: graphql.Fields{
+		"success": &graphql.Field{
+			Type: graphql.Boolean,
+		},
+		"errors": &graphql.Field{
+			Type: graphql.NewList(FieldErrorType),
+		},
+		"access": &graphql.Field{
+			Type: graphql.String,
+		},
+		"refresh": &graphql.Field{
+			Type: graphql.String,
 		},
 	},
 })
