@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/manjurulhoque/go-gql-crud/internal/models"
 	"github.com/manjurulhoque/go-gql-crud/internal/utils"
@@ -72,4 +73,22 @@ func Login(user *models.User) (string, string, error) {
 	}
 
 	return accessToken, refreshToken, nil
+}
+
+func RefreshAccessToken(refreshToken string) (string, error) {
+	token, err := jwt.ParseWithClaims(refreshToken, &utils.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(utils.AuthSecret), nil
+	})
+	if err != nil {
+		return "", errors.New("couldn't parse refresh token")
+	}
+	if claims, ok := token.Claims.(*utils.JWTClaims); ok && token.Valid {
+		if claims.ExpiresAt > time.Now().Unix() {
+			return utils.GenerateJWTToken(&utils.JWTClaims{
+				UserId: claims.UserId,
+				Email:  claims.Email, // Optionally include email if needed
+			}, AccessTokenExpireTime)
+		}
+	}
+	return "", errors.New("invalid refresh token")
 }

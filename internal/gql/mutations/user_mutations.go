@@ -23,6 +23,12 @@ type LoginResponse struct {
 	Refresh string             `json:"refresh"`
 }
 
+type RefreshAccessResponse struct {
+	Success bool               `json:"success,omitempty"`
+	Errors  []utils.FieldError `json:"errors,omitempty"`
+	Access  string             `json:"access"`
+}
+
 var UserMutations = graphql.Fields{
 	"register": &graphql.Field{
 		Type: types.RegisterResponseType,
@@ -134,6 +140,37 @@ var UserMutations = graphql.Fields{
 				Success: true,
 				Access:  accessToken,
 				Refresh: refreshToken,
+			}, nil
+		},
+	},
+	"refreshAccessToken": &graphql.Field{
+		Type:        types.TokenRefreshResponseType,
+		Description: "Refresh the access token using a refresh token",
+		Args: graphql.FieldConfigArgument{
+			"refreshToken": &graphql.ArgumentConfig{
+				Type: graphql.NewNonNull(graphql.String),
+			},
+		},
+		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			refreshToken := p.Args["refreshToken"].(string)
+
+			// Validate the refresh token and issue a new access token
+			newAccessToken, err := auth.RefreshAccessToken(refreshToken)
+			if err != nil {
+				return &RefreshAccessResponse{
+					Success: false,
+					Errors: []utils.FieldError{
+						{
+							Key:   "unknown",
+							Value: err.Error(),
+						},
+					},
+				}, nil
+			}
+
+			return &RefreshAccessResponse{
+				Success: true,
+				Access:  newAccessToken,
 			}, nil
 		},
 	},
