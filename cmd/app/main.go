@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/graphql-go/handler"
 	"github.com/manjurulhoque/go-gql-crud/internal/gql"
@@ -51,6 +52,16 @@ func main() {
 
 	// Convert http.HandlerFunc to gin.HandlerFunc
 	gqlHandler := func(c *gin.Context) {
+		// Extract the Authorization header from the incoming request
+		authHeader := c.GetHeader("Authorization")
+
+		// Create a new context that carries the Authorization header
+		ctx := context.WithValue(c.Request.Context(), "Authorization", authHeader)
+
+		// Attach the new context with the Authorization to the request
+		c.Request = c.Request.WithContext(ctx)
+
+		// Serve using the GraphQL handler
 		h.ServeHTTP(c.Writer, c.Request)
 	}
 

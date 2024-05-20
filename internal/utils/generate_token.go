@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"log"
 	"time"
 )
 
@@ -17,4 +19,24 @@ func GenerateJWTToken(claims *JWTClaims, expireTime time.Duration) (string, erro
 	claims.ExpiresAt = time.Now().Add(expireTime).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(AuthSecret))
+}
+
+func VerifyAction(strToken string) (*JWTClaims, error) {
+	token, err := jwt.ParseWithClaims(strToken, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(AuthSecret), nil
+	})
+
+	if err != nil {
+		log.Print(err.Error())
+		return nil, errors.New("unauthorized")
+	}
+	claims, ok := token.Claims.(*JWTClaims)
+	if !ok {
+		return nil, errors.New("unauthorized")
+	}
+	if err := token.Claims.Valid(); err != nil {
+		log.Print(err.Error())
+		return nil, errors.New("unauthorized")
+	}
+	return claims, nil
 }
