@@ -6,6 +6,8 @@ type Post struct {
 	ID          int    `json:"id"`
 	Title       string `json:"title,min=5"`
 	Description string `json:"description"`
+	UserId      int    `json:"user_id"`
+	User        User   `json:"user"`
 }
 
 // Create saves a new post to the database

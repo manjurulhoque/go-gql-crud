@@ -3,7 +3,7 @@ package utils
 import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"log"
+	"log/slog"
 	"time"
 )
 
@@ -27,7 +27,7 @@ func VerifyAction(strToken string) (*JWTClaims, error) {
 	})
 
 	if err != nil {
-		log.Print(err.Error())
+		slog.Error("Error in verifying action", "error", err.Error())
 		return nil, errors.New("unauthorized")
 	}
 	claims, ok := token.Claims.(*JWTClaims)
@@ -35,7 +35,7 @@ func VerifyAction(strToken string) (*JWTClaims, error) {
 		return nil, errors.New("unauthorized")
 	}
 	if err := token.Claims.Valid(); err != nil {
-		log.Print(err.Error())
+		slog.Error("Error in verifying action", "error", err.Error())
 		return nil, errors.New("unauthorized")
 	}
 	return claims, nil

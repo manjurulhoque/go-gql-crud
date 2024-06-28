@@ -23,7 +23,7 @@ type LoginInput struct {
 }
 
 const (
-	AccessTokenExpireTime  = 15 * time.Minute   // 15 minutes
+	AccessTokenExpireTime  = 24 * time.Hour     // 1 day
 	RefreshTokenExpireTime = 7 * 24 * time.Hour // 7 days
 )
 
