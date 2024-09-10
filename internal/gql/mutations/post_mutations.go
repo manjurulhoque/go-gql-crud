@@ -1,6 +1,7 @@
 package mutations
 
 import (
+	"errors"
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/gqlerrors"
 	middleware "github.com/manjurulhoque/go-gql-crud/internal"
@@ -36,9 +37,14 @@ var PostMutations = graphql.Fields{
 			},
 		},
 		Resolve: middleware.AuthMiddleware(func(p graphql.ResolveParams) (interface{}, error) {
+			user, ok := p.Context.Value("currentUser").(*models.User)
+			if !ok {
+				return nil, errors.New("could not retrieve user from context")
+			}
 			post := models.Post{
 				Title:       p.Args["title"].(string),
 				Description: p.Args["description"].(string),
+				UserId:      user.ID,
 			}
 			validationErrors := utils.TranslateError(post)
 			if validationErrors != nil {
